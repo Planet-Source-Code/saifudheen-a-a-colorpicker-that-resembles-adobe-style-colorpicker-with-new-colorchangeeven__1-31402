@@ -1,0 +1,217 @@
+VERSION 5.00
+Begin VB.PropertyPage General 
+   Caption         =   "General"
+   ClientHeight    =   3495
+   ClientLeft      =   0
+   ClientTop       =   0
+   ClientWidth     =   5925
+   LockControls    =   -1  'True
+   PaletteMode     =   0  'Halftone
+   ScaleHeight     =   233
+   ScaleMode       =   3  'Pixel
+   ScaleWidth      =   395
+   Begin VB.CheckBox Check1 
+      Caption         =   "Adjust Position"
+      Height          =   195
+      Left            =   480
+      TabIndex        =   7
+      Top             =   2610
+      Value           =   1  'Checked
+      Width           =   1575
+   End
+   Begin VB.TextBox txtDialogTop 
+      Enabled         =   0   'False
+      Height          =   285
+      Left            =   1350
+      MaxLength       =   5
+      TabIndex        =   4
+      Text            =   "0"
+      Top             =   2160
+      Width           =   555
+   End
+   Begin VB.TextBox txtDialogLeft 
+      Enabled         =   0   'False
+      Height          =   285
+      Left            =   1350
+      MaxLength       =   5
+      TabIndex        =   3
+      Text            =   "0"
+      Top             =   1830
+      Width           =   555
+   End
+   Begin VB.OptionButton Option3 
+      Caption         =   "Manual"
+      Height          =   195
+      Left            =   450
+      TabIndex        =   2
+      Top             =   1380
+      Width           =   1845
+   End
+   Begin VB.OptionButton Option2 
+      Caption         =   "Centre Screen"
+      Height          =   195
+      Left            =   450
+      TabIndex        =   1
+      Top             =   1080
+      Width           =   1845
+   End
+   Begin VB.OptionButton Option1 
+      Caption         =   "Centre Owner"
+      Height          =   195
+      Left            =   450
+      TabIndex        =   0
+      Top             =   780
+      Value           =   -1  'True
+      Width           =   1845
+   End
+   Begin VB.Label Label2 
+      Caption         =   "DialogTop :"
+      Enabled         =   0   'False
+      Height          =   225
+      Left            =   480
+      TabIndex        =   6
+      Top             =   2190
+      Width           =   825
+   End
+   Begin VB.Label Label1 
+      Caption         =   "DialogLeft :"
+      Enabled         =   0   'False
+      Height          =   225
+      Left            =   480
+      TabIndex        =   5
+      Top             =   1890
+      Width           =   825
+   End
+End
+Attribute VB_Name = "General"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = True
+Attribute VB_PredeclaredId = False
+Attribute VB_Exposed = True
+
+
+Private Sub txtDialogTop_Change()
+    PropertyPage.Cls
+    PropertyPage_Paint
+    Changed = True
+End Sub
+
+
+Private Sub txtDialogLeft_Change()
+    PropertyPage.Cls
+    PropertyPage_Paint
+    Changed = True
+End Sub
+
+
+Private Sub PropertyPage_ApplyChanges()
+    SelectedControls(0).DialogTop = Val(txtDialogTop.Text)
+    SelectedControls(0).DialogLeft = Val(txtDialogLeft.Text)
+    SelectedControls(0).AdjustPosition = Check1.Value
+    SelectedControls(0).DialogStartUpPosition = Switch(Option1.Value, 0, Option2.Value, 1, Option3.Value, 2)
+End Sub
+
+
+Private Sub PropertyPage_SelectionChanged()
+    txtDialogTop.Text = SelectedControls(0).DialogTop
+    txtDialogLeft.Text = SelectedControls(0).DialogLeft
+    If SelectedControls(0).AdjustPosition Then
+        Check1.Value = vbChecked
+    Else
+        Check1.Value = vbUnchecked
+    End If
+    Select Case SelectedControls(0).DialogStartUpPosition
+    Case 0
+        Option1.Value = True
+    Case 1
+        Option2.Value = True
+    Case 2
+        Option3.Value = True
+    End Select
+    UpdateTextBox
+End Sub
+
+Private Sub UpdateTextBox()
+    If Option3.Value Then
+        txtDialogLeft.Enabled = True
+        txtDialogTop.Enabled = True
+        Label1.Enabled = True
+        Label2.Enabled = True
+    Else
+        txtDialogLeft.Enabled = False
+        txtDialogTop.Enabled = False
+        Label1.Enabled = False
+        Label2.Enabled = False
+    End If
+End Sub
+Private Sub Check1_Click()
+    Changed = True
+    PropertyPage.Cls
+    PropertyPage_Paint
+End Sub
+
+Private Sub Option1_Click()
+    Changed = True
+    PropertyPage.Cls
+    PropertyPage_Paint
+End Sub
+
+Private Sub Option2_Click()
+    Changed = True
+    PropertyPage.Cls
+    PropertyPage_Paint
+End Sub
+
+Private Sub Option3_Click()
+    Changed = True
+    PropertyPage.Cls
+    PropertyPage_Paint
+    
+End Sub
+
+ 
+Private Sub PropertyPage_Paint()
+    DrawScreen
+    DrawWindow 240, 70, 90, 60
+    Dim x As Integer, y As Integer
+    x = 170 + Val(txtDialogLeft.Text) * 170 * 15 / Screen.Width
+    y = 40 + Val(txtDialogTop.Text) * 127 * 15 / Screen.Height
+    If Check1.Value = vbChecked Then
+        If x + 40 >= 340 Then x = 340 - 40
+        If x < 170 Then x = 170
+        If y + 26 > 167 Then y = 167 - 26
+        If y < 40 Then y = 40
+    End If
+    Select Case True
+    Case Option1.Value
+        DrawWindow 265, 87, 40, 26, True
+        Check1.Enabled = True
+    Case Option2.Value
+        DrawWindow 235, 83.5, 40, 26, True
+        Check1.Enabled = False
+    Case Option3.Value
+        DrawWindow x, y, 40, 26, True
+        Check1.Enabled = True
+    End Select
+    UpdateTextBox
+    
+End Sub
+
+Private Sub DrawWindow(ByVal x As Integer, ByVal y As Integer, ByVal W As Integer, ByVal H As Integer, Optional Active As Boolean)
+        If Active Then cl = vbActiveTitleBar Else cl = vbInactiveTitleBar
+        PropertyPage.Line (x, y)-(x + W, y + H), PropertyPage.BackColor, BF
+        PropertyPage.Line (x, y)-(x + W, y + 6), cl, BF
+        PropertyPage.Line (x, y)-(x + W, y + H), 0, B
+        PropertyPage.CurrentX = x + W - 6
+        PropertyPage.CurrentY = y - 4
+        PropertyPage.Print "x"
+End Sub
+
+Private Sub DrawScreen()
+        PropertyPage.Line (160, 30)-(350, 180), , B
+        PropertyPage.Line (170, 40)-(340, 167), , B
+        PropertyPage.Line (200, 180)-(300, 190), , B
+        PropertyPage.Line (160, 190)-(350, 195), , B
+End Sub
+
+ 
